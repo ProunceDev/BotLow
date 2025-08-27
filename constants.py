@@ -16,12 +16,14 @@ SQUEAKER_ROLE_ID = 1174401617219555389
 TRAPPER_ROLE_ID = 1174401711662714980
 GOON_ROLE_ID = 1174401521178398904
 LFT_ROLE_ID = 1189340890565713940
+GAME_NIGHT_ROLE_ID = 1409989985066815593
 
 REACTION_ROLES = {
 					"🗣️": SQUEAKER_ROLE_ID,
 					"😎": GOON_ROLE_ID,
 					"🥸": TRAPPER_ROLE_ID,
-					"❤": LFT_ROLE_ID
+					"❤": LFT_ROLE_ID,
+					"🎮": GAME_NIGHT_ROLE_ID
 				}
 
 RULES_EMBED = Embed(
@@ -54,6 +56,8 @@ REACTION_ROLES_EMBED = Embed(
 				> 🥸 **Trapper** ➝ Familiar with the current trapping meta and strategies.
 
 				> ❤ **LFT** ➝ Be notified when players are looking for teammates.
+
+				> 🎮 **Game Night Ping** -> Be notified whenever staff sanctioned game nights happen.
 				""",
     color=BrandColors.BLURPLE
 )
