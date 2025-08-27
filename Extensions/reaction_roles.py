@@ -32,21 +32,35 @@ class ReactionHandler(Extension):
 		
 	@Task.create(IntervalTrigger(hours=1))
 	async def reaction_roles_task(self):
-
 		channel = await bot.fetch_channel(REACTION_ROLES_CHANNEL_ID)
 
 		async for previous_message in channel.history(limit=10):
-			if not (previous_message.embeds and previous_message.embeds[0].title == REACTION_ROLES_EMBED.title and previous_message.author == self.bot.user):
-				await previous_message.delete()
-				message = await channel.send(embed=REACTION_ROLES_EMBED)
-						
-				try:
-					await message.add_reaction("🗣️")
-					await message.add_reaction("😎")
-					await message.add_reaction("🥸")
-					await message.add_reaction("❤")
-				except Exception as e:
-					print(f"Failed to add reactions: {e}")
+			# Only check messages by the bot with an embed
+			if previous_message.author == self.bot.user and previous_message.embeds:
+				existing_embed = previous_message.embeds[0]
+
+				# Compare titles (and optionally other fields)
+				if existing_embed.title == REACTION_ROLES_EMBED.title:
+					# If embed is different, edit it
+					if existing_embed.to_dict() != REACTION_ROLES_EMBED.to_dict():
+						await previous_message.edit(embed=REACTION_ROLES_EMBED)
+					return  # Found and handled the right message, exit the loop
+
+			# If message is not the reaction roles message, delete it
+			await previous_message.delete()
+
+		# If no valid embed found, send a new one
+		message = await channel.send(embed=REACTION_ROLES_EMBED)
+
+		try:
+			await message.add_reaction("🎮")
+			await message.add_reaction("🗣️")
+			await message.add_reaction("😎")
+			await message.add_reaction("🥸")
+			await message.add_reaction("❤")
+		except Exception as e:
+			print(f"Failed to add reactions: {e}")
+
 
 	@listen(Startup)
 	async def on_startup(self, event: Startup):
