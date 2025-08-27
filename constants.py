@@ -57,7 +57,7 @@ REACTION_ROLES_EMBED = Embed(
 
 				> ❤ **LFT** ➝ Be notified when players are looking for teammates.
 
-				> 🎮 **Game Night Ping** -> Be notified whenever staff sanctioned game nights happen.
+				> 🎮 **Game Night Ping** -> Be notified about staff sanctioned game nights.
 				""",
     color=BrandColors.BLURPLE
 )
