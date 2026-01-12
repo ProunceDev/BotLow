@@ -42,7 +42,8 @@ class Commands(Extension):
 		await ctx.defer(ephemeral=False)
 
 		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
-		if role in ctx.author.roles:
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
 			mc_uuid, mc_name = whitelist.get_minecraft_account(mc_username)
 
 			if mc_uuid and is_valid_uuid(mc_uuid):
@@ -121,7 +122,8 @@ class Commands(Extension):
 		await ctx.defer(ephemeral=False)
 
 		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
-		if role in ctx.author.roles:
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
 			mc_uuid, mc_name = whitelist.get_minecraft_account(mc_username)
 
 			if mc_uuid and is_valid_uuid(mc_uuid):

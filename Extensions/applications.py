@@ -88,7 +88,8 @@ class Applications(Extension):
 	async def view_applications(self, ctx: SlashContext):
 		await ctx.defer()
 		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
-		if role in ctx.author.roles:
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
 			current_id = int(config.get_setting("current_application_id", "0"))
 
 			next_app = await self.get_next_application(current_id)
@@ -130,7 +131,8 @@ class Applications(Extension):
 	async def deny_button(self, ctx: ComponentContext):
 		await ctx.defer()
 		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
-		if role in ctx.author.roles:
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
 			await self.set_application_status(application_id, "DENIED")
 			await ctx.channel.send(embed=Embed(f"Denied application #{application_id}", "Sending next application", 0xFF0000))
@@ -182,7 +184,8 @@ class Applications(Extension):
 	async def accept_button(self, ctx: ComponentContext):
 		await ctx.defer()
 		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
-		if role in ctx.author.roles:
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
 			await self.set_application_status(application_id, "ACCEPTED")
 			await ctx.channel.send(embed=Embed(f"Accepted application #{application_id}", "Sending next application", 0x00FF00))
@@ -269,7 +272,8 @@ class Applications(Extension):
 	async def delay_button(self, ctx: ComponentContext):
 		await ctx.defer()
 		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
-		if role in ctx.author.roles:
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
 			await self.move_application_to_back(application_id)
 			await ctx.channel.send(embed=Embed(f"Pushed application #{application_id} to the back.", "Sending next application", 0xFF0000))
