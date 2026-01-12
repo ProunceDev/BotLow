@@ -19,9 +19,6 @@ LFT_ROLE_ID = 1189340890565713940
 GAME_NIGHT_ROLE_ID = 1409989985066815593
 
 REACTION_ROLES = {
-					"🗣️": SQUEAKER_ROLE_ID,
-					"😎": GOON_ROLE_ID,
-					"🥸": TRAPPER_ROLE_ID,
 					"❤": LFT_ROLE_ID,
 					"🎮": GAME_NIGHT_ROLE_ID
 				}
@@ -49,15 +46,19 @@ RULES_EMBED = Embed(
 REACTION_ROLES_EMBED = Embed(
     title="Reaction Roles", 
     description="""
-				> 🗣️ **Squeaker** ➝ Have a voice that sounds like a child.
-
-				> 😎 **Goon** ➝ Skilled at acquiring resources and excelling in PvP.
-
-				> 🥸 **Trapper** ➝ Familiar with the current trapping meta and strategies.
-
 				> ❤ **LFT** ➝ Be notified when players are looking for teammates.
 
 				> 🎮 **Game Night Ping** -> Be notified about staff sanctioned game nights.
 				""",
     color=BrandColors.BLURPLE
 )
+
+QUESTIONS = [
+	"Will you abide by the server rules?",
+	"Do you understand that failure to follow the rules may result in a ban?",
+	"What is your age? Not a deal breaker.",
+	"Why do you want to join the server?",
+	"Do you have the ability to voice call on Discord or via Proximity chat?",
+	"What is your in-game name and platform?",
+	"Will you be respectful to other members of the community?"
+]
