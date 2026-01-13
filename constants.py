@@ -54,6 +54,7 @@ REACTION_ROLES_EMBED = Embed(
 )
 
 QUESTIONS = [
+	"If you made an application video, send a link to it here!",
 	"Will you abide by the server rules?",
 	"Do you understand that failure to follow the rules may result in a ban?",
 	"What is your age? Not a deal breaker.",
