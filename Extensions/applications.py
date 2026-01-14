@@ -170,7 +170,8 @@ class Applications(Extension):
 					)
 				)
 				return
-			user_id = app.get("0", {"id":"N/A"})["id"]
+			data = dict(json.loads(app[1]))
+			user_id = data.get("0", {"id":"N/A"})["id"]
 			try:
 				member = await ctx.guild.fetch_member(user_id)
 				embed = Embed(
