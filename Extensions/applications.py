@@ -72,6 +72,22 @@ class Applications(Extension):
 			await db.execute("UPDATE applications SET id = ? WHERE id = ?", (new_id, application_id))
 			await db.commit()
 
+	async def delete_application(self, application_id: int):
+		async with aiosqlite.connect("applications.db") as db:
+			await db.execute("DELETE FROM applications WHERE id = ?", (application_id,))
+			await db.commit()
+
+		# update all IDs greater than the deleted one to fill the gap
+		async with aiosqlite.connect("applications.db") as db:
+			await db.execute("UPDATE applications SET id = id - 1 WHERE id > ?", (application_id,))
+			await db.commit()
+
+	async def get_application_by_id(self, app_id: int):
+		async with aiosqlite.connect("applications.db") as db:
+			async with db.execute("SELECT id, data FROM applications WHERE id = ?", (app_id,)) as cursor:
+				row = await cursor.fetchone()
+				return row if row else None
+
 	def build_application_embed(self, data: dict, username: str, id: str) -> Embed:
 		embed = Embed(title=f"{username}'s Application", description=f"Reviewing application #{id}", color=0x00ff99)
 
@@ -117,6 +133,62 @@ class Applications(Extension):
 						0xFF0000
 					)
 				)
+		else:
+			await ctx.send(
+				embed=Embed(
+					"No permission!",
+					"You can't run this command without the Staff role.",
+					0xFF0000
+				)
+				, ephemeral=True
+			)
+
+	@slash_command(
+		name="application_delete",
+		description="Delete an application by its ID.",
+		options=[
+			SlashCommandOption(
+				name="application_id",
+				description="The ID of the application to delete.",
+				type=OptionType.INTEGER,
+				required=True
+			)
+		]
+	)
+	async def application_delete(self, ctx: SlashContext, application_id: int):
+		await ctx.defer()
+		role = ctx.guild.get_role(config.get_setting("staff_role_id", ""))
+		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
+		if role in ctx.author.roles or role2 in ctx.author.roles:
+			app = await self.get_application_by_id(application_id)
+			if not app:
+				await ctx.send(
+					embed=Embed(
+						"Application Not Found",
+						f"No application found with ID #{application_id}.",
+						0xFF0000
+					)
+				)
+				return
+			user_id = app.get("0", {"id":"N/A"})["id"]
+			try:
+				member = await ctx.guild.fetch_member(user_id)
+				embed = Embed(
+					title="Application Deleted",
+					description=f"Your application for the JudeLowSMP has been deleted by staff. You may now reapply if you wish.",
+					color=0xFF0000
+				)
+				await member.send(embed=embed)
+			except:
+				pass
+			await self.delete_application(application_id)
+			await ctx.send(
+				embed=Embed(
+					"Application Deleted",
+					f"Successfully deleted application #{application_id}.",
+					0x00FF00
+				)
+			)
 		else:
 			await ctx.send(
 				embed=Embed(
@@ -353,10 +425,10 @@ class Applications(Extension):
 				await message.channel.send("You're already in the application process.")
 				return
 			if await self.has_applied(user_id):
-				await message.channel.send("You've already applied for the JudeLowSMP, we will contact you if you are accepted. (Make sure your DMs are open.)")
+				await message.channel.send("You've already applied for the JudeLowSMP, we will contact you if you are accepted. (Make sure your DMs are open.)\n-# If you would like to reapply, please contact a staff member.")
 				return
 
-			await message.channel.send('The application process has started. Say "Ready" when you are ready to start.')
+			await message.channel.send('The application process has started. Say "Ready" when you are ready to start, and **!cancel** to cancel at any time.')
 			application_temp[user_id] = {0: {"name": message.author.display_name, "id": user_id}}
 			applications_in_progress[user_id] = 1
 			return
