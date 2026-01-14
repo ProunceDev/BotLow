@@ -398,6 +398,10 @@ class Applications(Extension):
 	async def on_message_create(self, event):
 		message = event.message
 
+		if not message.author.bot and message.guild is not None:
+			if "!apply" in message.content.lower() or "@botlow" in message.content.lower() or "<@1308532022569996309>" in message.content.lower():
+				await message.channel.send("Hi there! To apply for the JudeLowSMP, please **direct message** me with **!apply** to start the application process.")
+
 		if message.author.bot or message.guild is not None:
 			return
 
