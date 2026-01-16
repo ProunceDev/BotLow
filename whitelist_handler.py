@@ -6,7 +6,7 @@
 
 # Python parser for the custom format
 
-import requests, os
+import requests, os, json
 
 def load_users(filename="event.whitelist"):
     users = []
@@ -88,4 +88,24 @@ def get_minecraft_username_by_uuid(uuid):
         data = response.json()
         if data:
             return data.get("data").get("player").get("username")
+    return None
+
+def save_user_role(uuid, role):
+    filepath = "user_roles.json"
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            user_roles = json.load(file)
+    else:
+        user_roles = {}
+    
+    user_roles[uuid] = role
+    with open(filepath, 'w') as file:
+        json.dump(user_roles, file)
+
+def get_user_role(uuid):
+    filepath = "user_roles.json"
+    if os.path.exists(filepath):
+        with open(filepath, 'r') as file:
+            user_roles = json.load(file)
+            return user_roles.get(uuid, "None")
     return None

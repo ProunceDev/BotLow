@@ -46,5 +46,18 @@ def check_whitelisted():
 		return jsonify({"status": "success", "message": f"User {uuid} is whitelisted in {filename}"}), 200
 	return jsonify({"status": "failure", "message": f"User {uuid} is not whitelisted in {filename}"}), 404
 
+@app.route('/whitelist/discord_link/get', methods=['GET'])
+def get_discord_link():
+	uuid = request.args.get("uuid")
+
+	if not uuid:
+		return jsonify({"status": "failure", "message": "Missing uuid"}), 400
+	
+	user_role = whitelist.get_user_role(uuid)
+
+	if user_role is not None:
+		return jsonify({"status": "success", "role": user_role}), 200
+	return jsonify({"status": "failure", "message": f"No role found for UUID {uuid}"}), 404
+
 if __name__ == "__main__":
 	app.run(host="0.0.0.0", port=5000)

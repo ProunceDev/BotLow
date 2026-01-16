@@ -162,3 +162,5 @@ token.py
 bot_token.py
 applications.db
 event.whitelist
+staff.whitelist
+user_roles.json

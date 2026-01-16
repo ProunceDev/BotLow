@@ -41,3 +41,45 @@ class WhitelistChannel(Extension):
 			await event.message.add_reaction("❌")
 			reply = await event.message.reply(embed=create_embed(f"Invalid account!", f"We weren't able to find a minecraft account with this username, check your spelling and try again.", 0xFF0000))
 			await whitelist_log_channel.send(embed=create_embed(f"Whitelist Log", f"**{event.message.author.username}** tried to whitelist **{username}**, but it was an invalid account.", 0xFFFF00))
+
+	@Task.create(IntervalTrigger(minutes=1))
+	async def update_roles(self):
+		users = whitelist.load_users("event.whitelist")
+
+		guild = bot.get_guild(int(config.get_setting("guild_id", "")))
+		if guild is None:
+			return
+
+		ROLE_IDS = {
+			"smp_access": 1460297298994008225,
+			"booster": 1177279290577002608,
+			"member": 1461521851816743005,
+		}
+
+		# Highest > lowest priority
+		ROLE_PRIORITY = ["member", "booster", "smp_access"]
+
+		for user in users:
+			discord_id = int(user[0])
+			mc_uuid = user[2]
+
+			member = guild.get_member(discord_id)
+
+			if member is None:
+				continue  # User left server or not cached
+
+			member_role_ids = {role.id for role in member.roles}
+
+			assigned_role = None
+			for role_name in ROLE_PRIORITY:
+				if ROLE_IDS[role_name] in member_role_ids:
+					assigned_role = role_name
+					break
+
+			whitelist.save_user_role(mc_uuid, assigned_role)
+
+	@listen()
+	async def on_ready(self):
+		print("Starting role task...")
+		await self.update_roles()
+		self.update_roles.start()
