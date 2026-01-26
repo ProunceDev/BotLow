@@ -490,14 +490,14 @@ class Applications(Extension):
 			application_temp[user_id][progress - 1] = message.content
 			if progress - 1 > len(QUESTIONS) - 1:
 				applications_in_progress[user_id] = 0
-
+				app_id = 0
 				async with aiosqlite.connect("applications.db") as db:
-					await db.execute(
+					cursor = await db.execute(
 						"INSERT INTO applications (data, user_id) VALUES (?, ?)",
 						(json.dumps(application_temp[user_id]), user_id)
 					)
 					await db.commit()
-				app_id = (await db.execute("SELECT last_insert_rowid()")).fetchone()[0]
+					app_id = cursor.lastrowid
 
 				await message.channel.send(f"✅ Thanks! Your application has been submitted. We’ll reach out if you're selected. (Make sure your DMs are open.) `Application ID: {app_id}`")
 				
