@@ -54,12 +54,10 @@ REACTION_ROLES_EMBED = Embed(
 )
 
 QUESTIONS = [
-	"If you made an application video, send a link to it here!",
-	"Will you abide by the server rules?",
-	"Do you understand that failure to follow the rules may result in a ban?",
+	"Send the link to your Application Video on YouTube here, if you have not made one yet, type **!cancel** to cancel the application.",
+	"Do you intend to make regular content for the server? (YouTube videos, Twitch streams, etc.)",
 	"What is your age? Not a deal breaker.",
 	"Why do you want to join the server?",
 	"Do you have the ability to voice call on Discord or via Proximity chat?",
 	"What is your in-game name and platform?",
-	"Will you be respectful to other members of the community?"
 ]

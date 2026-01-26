@@ -53,8 +53,9 @@ class Applications(Extension):
 				return (await cursor.fetchone())[0]
 			
 	async def get_next_application(self, current_id: int):
+		# Get the next application with ID greater than current_id and status NULL
 		async with aiosqlite.connect("applications.db") as db:
-			async with db.execute("SELECT id, data FROM applications WHERE id > ? ORDER BY id ASC LIMIT 1", (current_id,)) as cursor:
+			async with db.execute("SELECT id, data FROM applications WHERE id > ? AND status IS NULL ORDER BY id ASC LIMIT 1", (current_id,)) as cursor:
 				row = await cursor.fetchone()
 				return row if row else None
 			
@@ -348,7 +349,7 @@ class Applications(Extension):
 		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
 		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
-			await self.move_application_to_back(application_id)
+			#await self.move_application_to_back(application_id)
 			await ctx.channel.send(embed=Embed(f"Pushed application #{application_id} to the back.", "Sending next application", 0xFF0000))
 			await ctx.message.delete()
 
@@ -375,6 +376,32 @@ class Applications(Extension):
 				]
 
 				await ctx.channel.send(embed=embed, components=buttons)
+
+			elif self.get_unviewed_applications() > 0:
+				# wrap around to the first application
+				next_app = await self.get_next_application(0)
+
+				if next_app:
+					current_id, data = next_app
+
+					config.set_setting("current_application_id", str(current_id))
+
+					data = dict(json.loads(data))
+					embed = Embed(
+						title="Application Viewer",
+						description=f"Reviewing application #{current_id}",
+						color=0x3498db
+					)
+
+					embed = self.build_application_embed(data, data.get("0", {"name":"N/A"})["name"], str(current_id))
+
+					buttons = [
+						Button(style=ButtonStyle.DANGER, label="Deny", custom_id="application_deny"),
+						Button(style=ButtonStyle.SUCCESS, label="Accept", custom_id="application_accept"),
+						Button(style=ButtonStyle.SECONDARY, label="Push to back", custom_id="application_delay")
+					]
+
+					await ctx.channel.send(embed=embed, components=buttons)
 
 			else:
 				await ctx.channel.send(
@@ -444,9 +471,24 @@ class Applications(Extension):
 			return
 
 		if progress > 1 and progress <= len(QUESTIONS) + 1:
+			# make sure message is not longer then 500 characters
+			if len(message.content) > 500:
+				await message.channel.send("Your answer is too long, please keep it under 500 characters.")
+				return
+			
+			# make sure message contains no attachments
+			if len(message.attachments) > 0:
+				await message.channel.send("Please do not send attachments, only text answers are allowed.")
+				return
+			
+			# make sure all links contain youtube
+			if "http://" in message.content or "https://" in message.content:
+				if "youtube.com" not in message.content and "youtu.be" not in message.content:
+					await message.channel.send("Please only send YouTube links for your application video.")
+					return
+
 			application_temp[user_id][progress - 1] = message.content
 			if progress - 1 > len(QUESTIONS) - 1:
-				await message.channel.send("✅ Thanks! Your application has been submitted. We’ll reach out if you're selected. (Make sure your DMs are open.)")
 				applications_in_progress[user_id] = 0
 
 				async with aiosqlite.connect("applications.db") as db:
@@ -455,6 +497,10 @@ class Applications(Extension):
 						(json.dumps(application_temp[user_id]), user_id)
 					)
 					await db.commit()
+				app_id = (await db.execute("SELECT last_insert_rowid()")).fetchone()[0]
+
+				await message.channel.send(f"✅ Thanks! Your application has been submitted. We’ll reach out if you're selected. (Make sure your DMs are open.) `Application ID: {app_id}`")
+				
 				return
 
 			await message.channel.send(f"**({progress}/{len(QUESTIONS)})** {QUESTIONS[progress - 1]}")
