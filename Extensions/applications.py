@@ -377,7 +377,7 @@ class Applications(Extension):
 
 				await ctx.channel.send(embed=embed, components=buttons)
 
-			elif self.get_unviewed_applications() > 0:
+			elif await self.get_unviewed_applications() > 0:
 				# wrap around to the first application
 				next_app = await self.get_next_application(0)
 
