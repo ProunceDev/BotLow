@@ -209,7 +209,7 @@ class Applications(Extension):
 		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
 			await self.set_application_status(application_id, "DENIED")
-			await ctx.channel.send(embed=Embed(f"Denied application #{application_id}", "Sending next application", 0xFF0000))
+			await ctx.respond(embed=Embed(f"Denied application #{application_id}.", f"-# Unviewed apps remaining: **{await self.get_unviewed_applications()}**", 0xFF0000))
 			await ctx.message.delete()
 
 			next_app = await self.get_next_application(application_id)
@@ -235,6 +235,32 @@ class Applications(Extension):
 				]
 
 				await ctx.channel.send(embed=embed, components=buttons)
+				
+			elif await self.get_unviewed_applications() > 0:
+				# wrap around to the first application
+				next_app = await self.get_next_application(0)
+
+				if next_app:
+					current_id, data = next_app
+
+					config.set_setting("current_application_id", str(current_id))
+
+					data = dict(json.loads(data))
+					embed = Embed(
+						title="Application Viewer",
+						description=f"Reviewing application #{current_id}",
+						color=0x3498db
+					)
+
+					embed = self.build_application_embed(data, data.get("0", {"name":"N/A"})["name"], str(current_id))
+
+					buttons = [
+						Button(style=ButtonStyle.DANGER, label="Deny", custom_id="application_deny"),
+						Button(style=ButtonStyle.SUCCESS, label="Accept", custom_id="application_accept"),
+						Button(style=ButtonStyle.SECONDARY, label="Push to back", custom_id="application_delay")
+					]
+
+					await ctx.channel.send(embed=embed, components=buttons)
 
 			else:
 				await ctx.channel.send(
@@ -262,7 +288,7 @@ class Applications(Extension):
 		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
 			await self.set_application_status(application_id, "ACCEPTED")
-			await ctx.channel.send(embed=Embed(f"Accepted application #{application_id}", "Sending next application", 0x00FF00))
+			await ctx.respond(embed=Embed(f"Accepted application #{application_id}.", f"-# Unviewed apps remaining: **{await self.get_unviewed_applications()}**", 0x00FF00))
 			await ctx.message.delete()
 
 			current_app = await self.get_application_by_id(application_id)
@@ -315,6 +341,31 @@ class Applications(Extension):
 
 					await ctx.channel.send(embed=embed, components=buttons)
 
+				elif await self.get_unviewed_applications() > 0:
+					# wrap around to the first application
+					next_app = await self.get_next_application(0)
+
+					if next_app:
+						current_id, data = next_app
+
+						config.set_setting("current_application_id", str(current_id))
+
+						data = dict(json.loads(data))
+						embed = Embed(
+							title="Application Viewer",
+							description=f"Reviewing application #{current_id}",
+							color=0x3498db
+						)
+
+						embed = self.build_application_embed(data, data.get("0", {"name":"N/A"})["name"], str(current_id))
+
+						buttons = [
+							Button(style=ButtonStyle.DANGER, label="Deny", custom_id="application_deny"),
+							Button(style=ButtonStyle.SUCCESS, label="Accept", custom_id="application_accept"),
+							Button(style=ButtonStyle.SECONDARY, label="Push to back", custom_id="application_delay")
+						]
+
+						await ctx.channel.send(embed=embed, components=buttons)
 				else:
 					await ctx.channel.send(
 						embed=Embed(
@@ -349,7 +400,7 @@ class Applications(Extension):
 		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
 		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
-			await ctx.respond(embed=Embed(f"Pushed application #{application_id} to the back.", f"-# Unviewed apps remaining: **{await self.get_unviewed_applications()}**", 0xFF0000))
+			await ctx.respond(embed=Embed(f"Pushed application #{application_id} to the back.", f"-# Unviewed apps remaining: **{await self.get_unviewed_applications()}**", 0x0000FF))
 			await ctx.message.delete()
 
 			next_app = await self.get_next_application(application_id)
