@@ -349,8 +349,7 @@ class Applications(Extension):
 		role2 = ctx.guild.get_role(config.get_setting("mod_role_id", ""))
 		if role in ctx.author.roles or role2 in ctx.author.roles:
 			application_id = int(ctx.message.embeds[0].description.split("#")[1])
-			#await self.move_application_to_back(application_id)
-			await ctx.channel.send(embed=Embed(f"Pushed application #{application_id} to the back.", "Sending next application", 0xFF0000))
+			await ctx.respond(embed=Embed(f"Pushed application #{application_id} to the back.", f"Sending next application\n-# Unviewed apps remaining {await self.get_unviewed_applications()}", 0xFF0000))
 			await ctx.message.delete()
 
 			next_app = await self.get_next_application(application_id)
